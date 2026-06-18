@@ -13,8 +13,8 @@ Week 1
 - [ ] Person B — Tensor: matmul, reductions + demo + tooling - Anand
   - [ ] `matmul()` with inner-dimension shape validation (`a.shape[-1] == b.shape[-2]`)
   - [ ] Reductions: `sum()`, `mean()`, `max()` with axis / keepdims
-  - [ ] Light tooling: repo scaffolding, requirements.txt, shared pytest harness
-  - [ ] CI: GitHub Actions workflow to run the test suite on every push/PR (test job only)
+  - [ x] Light tooling: repo scaffolding, requirements.txt, shared pytest harness
+  - [x ] CI: GitHub Actions workflow to run the test suite on every push/PR (test job only)
   - [ ] End-to-end demo: assemble Sequential MLP, run forward pass, verify output shape (batch, 10) and Softmax rows sum to 1
   - [ ] Tests: matmul shape errors, reduction axis semantics
 - [ ] Person C — Activations (depends on Tensor arithmetic + max/sum) - Tina 

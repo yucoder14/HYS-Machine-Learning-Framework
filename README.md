@@ -33,18 +33,37 @@ Week 1
   - [ ] Tests: parameter counts, shape composition, dropout passthrough at inference
 
      
-- [ ] Get familiar with Numba framework (or jump straight to CUDA) (GPU)
-    - [ ] How do you do a matrix multiplication 
-    - [ ] etc
+- Everyone who wants to work on GPU acceleration: understanding GPUs architecture and numba.cuda framework 
+  - Recommend : https://www.youtube.com/watch?v=9bBsvpg-Xlk 
+  - Understanding GPU architecture hierarchy and memory organization 
+    - [ ] read/skim: https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html 
+    - Threads, warps, blocks, grid 
+    - SIMT (Single instruction, multiple threads) 
+  - Basics of writing cuda kernels with numba.cuda 
+    - [ ] read/skim: https://nvidia.github.io/numba-cuda/user/index.html 
+    - Memory transfers and thread mapping for 1d and nd tensors 
+    - Handling alignments 
 
 Week 2
 ------
 
+- [ ] Specialized layers (CNN or attention) 
 - [ ] Have a working backward pass (CPU)
-- [ ] visualizing the computation graph(stretch)
-- [ ] Figure out `.to(device)`
-- [ ] Have a working forward pass (GPU)  
+- [ ] visualizing the computation graph
 
+- GPU Person A - memory management, basic arithmetic, activations  
+  - [ ] `detect()` to check for GPU support 
+  - [ ] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
+  - [ ] `.numpy()` physically fetch data from GPU to CPU 
+  - [ ] Kernels for basic operations: `__add__`, `__subtract__`, `__mul__`, `__truediv__` 
+  - [ ] Kernels for activation layers: `ReLU`, `GELU`, `Sigmoid`, `Tanh`, `Softmax`
+
+- GPU Person B - matrix multiplication, reductions, testing/profiling suite 
+  - [ ] CI to benchmark CPU operations 
+  - [ ] CI to confirm correctness of CUDA kernels 
+  - [ ] Naive implementation of `__matmul__`
+  - [ ] tiled implementation of `__matmul__`
+  - [ ] Reductions 
 
 Week 3
 ------
@@ -53,6 +72,8 @@ Week 3
 - [ ] Convolution
 - [ ] Have a working backward pass (GPU)
 - [ ] Integrate CPU and GPU together 
+
+- [ ] Kernel fusion 
 
 Week 4
 ------

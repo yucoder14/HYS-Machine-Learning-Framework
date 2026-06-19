@@ -30,9 +30,24 @@ class Tensor:
     def __truediv__(self, other):
         result = Tensor(self._array / self._coerce(other))
         return result
+
+    def matmul(self,other): 
+        if self._array.shape[-1] != self._coerce(other).shape[-2]:
+            raise ValueError("Incompatible matrix dimensions")
+        result = Tensor(np.matmul(self._array, self._coerce(other)))
+        return result 
+    
+    def sum(self, axis=None, keepdims=False):
+        return Tensor(np.sum(self._array, axis=axis, keepdims=keepdims))
+
+    def mean(self,axis=None, keepdims=False):
+        return Tensor(np.mean(self._array, axis=axis, keepdims=keepdims))
+
+    def max(self, axis=None, keepdims=False): 
+        return Tensor(np.max(self._array, axis=axis, keepdims=keepdims))
     
     def reshape(self, *shape):
-        if(len(shape) == 1 & isinstance(shape[0], (tuple,list))):
+        if(len(shape) == 1 and isinstance(shape[0], (tuple,list))):
             shape = shape[0]
         self._array = self._array.reshape(shape)
         self.shape = self._array.shape

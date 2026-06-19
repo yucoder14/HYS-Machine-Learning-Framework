@@ -32,7 +32,7 @@ class Tensor:
         return result
     
     def reshape(self, *shape):
-        if(len(shape) == 1 & isinstance(shape[0], (tuple,list))):
+        if(len(shape) == 1 and isinstance(shape[0], (tuple,list))):
             shape = shape[0]
         self._array = self._array.reshape(shape)
         self.shape = self._array.shape

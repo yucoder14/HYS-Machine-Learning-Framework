@@ -32,8 +32,6 @@ class Tensor:
         return result
 
     def matmul(self,other): 
-        if self._array.shape[-1] != self._coerce(other).shape[-2]:
-            raise ValueError("Incompatible matrix dimensions")
         result = Tensor(np.matmul(self._array, self._coerce(other)))
         return result 
     

@@ -16,7 +16,7 @@ Week 1
   - [x] Light tooling: repo scaffolding, requirements.txt, shared pytest harness
   - [x] CI: GitHub Actions workflow to run the test suite on every push/PR (test job only)
   - [x] End-to-end demo: assemble Sequential MLP, run forward pass, verify output shape (batch, 10) and Softmax rows sum to 1
-  - [ ] Tests: matmul shape errors, reduction axis semantics
+  - [x] Tests: matmul shape errors, reduction axis semantics
 - [ ] Person C — Activations (depends on Tensor arithmetic + max/sum) - Tina 
   - [ ] Activation base pattern: `forward()`, `__call__()`, `backward()` stub
   - [ ] `ReLU` (`np.maximum(0, x)`)

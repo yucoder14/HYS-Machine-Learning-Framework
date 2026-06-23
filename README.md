@@ -46,7 +46,7 @@ Week 1
 
 Week 2 & 3 
 ------
-- [ ] Person A — Losses + log_softmax helper
+- [ ] Person A — Losses + log_softmax helper - Trisha
   - [ ] No blockers — depends only on Tensor (Sprint 1)
   - [ ] `log_softmax()` with log-sum-exp trick (numerical stability, subtract max before exp)
   - [ ] `MSELoss.forward()` (subtract, square, mean)
@@ -54,7 +54,7 @@ Week 2 & 3
   - [ ] `BinaryCrossEntropyLoss.forward()` (clamp predictions with eps=1e-7, BCE formula)
   - [ ] Tests: NaN on large logits (e.g. 100), shape mismatch errors, logits vs probabilities distinction
 
-- [ ] Person B — DataLoader
+- [ ] Person B — DataLoader - Catherine
   - [ ] No blockers — depends only on Tensor (Sprint 1)
   - [ ] `Dataset` abstract base class (`__len__`, `__getitem__` with @abstractmethod)
   - [ ] `TensorDataset` wrapping multiple tensors, validates matching first dimension
@@ -63,7 +63,7 @@ Week 2 & 3
   - [ ] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
   - [ ] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
 
-- [ ] Person C — Autograd
+- [ ] Person C — Autograd - Anand 
   - [ ] No blockers — depends only on Tensor (Sprint 1)
   - [ ] `Function` base class (stores `saved_tensors`, defines `apply()`)
   - [ ] `AddBackward`, `SubBackward`, `MulBackward`, `DivBackward` (gradient rules for arithmetic)
@@ -74,7 +74,7 @@ Week 2 & 3
   - [ ] `enable_autograd()` (monkey-patch Tensor ops to attach _grad_fn on output)
   - [ ] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
 
-- [ ] Person D — Optimizers + Trainer
+- [ ] Person D — Optimizers + Trainer - Tina
   - [ ] ⚠️ Blocked by Person C — needs Tensor.backward() and .grad before optimizer steps can be tested end-to-end. However can get started without implementation by assuming function
   - [ ] `Optimizer` base class (`zero_grad()`, `step()` interface)
   - [ ] `SGD` with momentum (velocity buffer, lazy init, weight decay)

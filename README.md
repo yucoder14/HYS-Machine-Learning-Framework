@@ -4,33 +4,33 @@
 
 Week 1
 ------
-- [ ] Person A — Tensor: construction, arithmetic, reshape (ships first — unblocks C and D fastest) - Catherine
-  - [ ] `__init__` wrapping a NumPy array; set data, shape, size, dtype
-  - [ ] Arithmetic dunders: `__add__`, `__sub__`, `__mul__`, `__truediv__` (Tensor+Tensor and Tensor+scalar)
-  - [ ] `reshape()` with -1 dimension inference + element-count validation
-  - [ ] `transpose()` (default: swap last two dims)
-  - [ ] Tests: broadcasting compatibility, scalar ops, reshape size-mismatch errors
-- [ ] Person B — Tensor: matmul, reductions + demo + tooling - Anand
+- [x] Person A — Tensor: construction, arithmetic, reshape (ships first — unblocks C and D fastest) - Catherine
+  - [x] `__init__` wrapping a NumPy array; set data, shape, size, dtype
+  - [x] Arithmetic dunders: `__add__`, `__sub__`, `__mul__`, `__truediv__` (Tensor+Tensor and Tensor+scalar)
+  - [x] `reshape()` with -1 dimension inference + element-count validation
+  - [x] `transpose()` (default: swap last two dims)
+  - [x] Tests: broadcasting compatibility, scalar ops, reshape size-mismatch errors
+- [x] Person B — Tensor: matmul, reductions + demo + tooling - Anand
   - [x] `matmul()` with inner-dimension shape validation (`a.shape[-1] == b.shape[-2]`)
   - [x] Reductions: `sum()`, `mean()`, `max()` with axis / keepdims
   - [x] Light tooling: repo scaffolding, requirements.txt, shared pytest harness
   - [x] CI: GitHub Actions workflow to run the test suite on every push/PR (test job only)
   - [x] End-to-end demo: assemble Sequential MLP, run forward pass, verify output shape (batch, 10) and Softmax rows sum to 1
   - [x] Tests: matmul shape errors, reduction axis semantics
-- [ ] Person C — Activations (depends on Tensor arithmetic + max/sum) - Tina 
-  - [ ] Activation base pattern: `forward()`, `__call__()`, `backward()` stub
-  - [ ] `ReLU` (`np.maximum(0, x)`)
-  - [ ] `Sigmoid` (numerically stable piecewise + clip at ±500)
-  - [ ] `Tanh` (`np.tanh`)
-  - [ ] `GELU` (fast approx, reuses Sigmoid: `sigmoid(1.702 * x) * x`)
-  - [ ] `Softmax` (subtract per-row max for stability, dim argument)
-  - [ ] Tests: output ranges, Softmax sums to 1, no NaN on large logits (e.g. 100)
-- [ ] Person D — Layers (depends on Tensor matmul + __add__) - Trisha 
-  - [ ] `Layer` base class: `forward()`, `__call__()`, `parameters()`
-  - [ ] `Linear`: LeCun init sqrt(1/in_features), weight (in, out) + bias (out,), forward = xW + b
-  - [ ] `Dropout`: training/inference modes, inverted scaling 1/(1-p)
-  - [ ] `Sequential`: chain forward, flatten per-layer parameters
-  - [ ] Tests: parameter counts, shape composition, dropout passthrough at inference
+- [x] Person C — Activations (depends on Tensor arithmetic + max/sum) - Tina 
+  - [x] Activation base pattern: `forward()`, `__call__()`, `backward()` stub
+  - [x] `ReLU` (`np.maximum(0, x)`)
+  - [x] `Sigmoid` (numerically stable piecewise + clip at ±500)
+  - [x] `Tanh` (`np.tanh`)
+  - [x] `GELU` (fast approx, reuses Sigmoid: `sigmoid(1.702 * x) * x`)
+  - [x] `Softmax` (subtract per-row max for stability, dim argument)
+  - [x] Tests: output ranges, Softmax sums to 1, no NaN on large logits (e.g. 100)
+- [x] Person D — Layers (depends on Tensor matmul + __add__) - Trisha 
+  - [x] `Layer` base class: `forward()`, `__call__()`, `parameters()`
+  - [x] `Linear`: LeCun init sqrt(1/in_features), weight (in, out) + bias (out,), forward = xW + b
+  - [x] `Dropout`: training/inference modes, inverted scaling 1/(1-p)
+  - [x] `Sequential`: chain forward, flatten per-layer parameters
+  - [x] Tests: parameter counts, shape composition, dropout passthrough at inference
 
      
 - Everyone who wants to work on GPU acceleration: understanding GPUs architecture and numba.cuda framework 

@@ -75,7 +75,7 @@ Week 2 & 3
   - [ ] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
 
 - [ ] Person D — Optimizers + Trainer
-  - [ ] ⚠️ Blocked by Person C — needs Tensor.backward() and .grad before optimizer steps can be tested end-to-end
+  - [ ] ⚠️ Blocked by Person C — needs Tensor.backward() and .grad before optimizer steps can be tested end-to-end. However can get started without implementation by assuming function
   - [ ] `Optimizer` base class (`zero_grad()`, `step()` interface)
   - [ ] `SGD` with momentum (velocity buffer, lazy init, weight decay)
   - [ ] `Adam` (m and v buffers, bias correction 1 - β^t, adaptive step)

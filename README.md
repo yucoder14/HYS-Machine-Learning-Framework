@@ -44,13 +44,49 @@ Week 1
     - Memory transfers and thread mapping for 1d and nd tensors 
     - Handling alignments 
 
-Week 2
+Week 2 & 3 
 ------
+- [ ] Person A — Losses + log_softmax helper
+  - [ ] No blockers — depends only on Tensor (Sprint 1)
+  - [ ] `log_softmax()` with log-sum-exp trick (numerical stability, subtract max before exp)
+  - [ ] `MSELoss.forward()` (subtract, square, mean)
+  - [ ] `CrossEntropyLoss.forward()` (calls log_softmax, indexes correct class, negative mean)
+  - [ ] `BinaryCrossEntropyLoss.forward()` (clamp predictions with eps=1e-7, BCE formula)
+  - [ ] Tests: NaN on large logits (e.g. 100), shape mismatch errors, logits vs probabilities distinction
 
-- [ ] Specialized layers (CNN or attention) 
-- [ ] Have a working backward pass (CPU)
-- [ ] visualizing the computation graph
+- [ ] Person B — DataLoader
+  - [ ] No blockers — depends only on Tensor (Sprint 1)
+  - [ ] `Dataset` abstract base class (`__len__`, `__getitem__` with @abstractmethod)
+  - [ ] `TensorDataset` wrapping multiple tensors, validates matching first dimension
+  - [ ] `DataLoader.__init__()` (store dataset, batch_size, shuffle flag)
+  - [ ] `DataLoader.__iter__()` (index shuffling, batch grouping, lazy generator with yield)
+  - [ ] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
+  - [ ] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
 
+- [ ] Person C — Autograd
+  - [ ] No blockers — depends only on Tensor (Sprint 1)
+  - [ ] `Function` base class (stores `saved_tensors`, defines `apply()`)
+  - [ ] `AddBackward`, `SubBackward`, `MulBackward`, `DivBackward` (gradient rules for arithmetic)
+  - [ ] `MatmulBackward` (grad_A = grad @ B.T, grad_B = A.T @ grad)
+  - [ ] `SumBackward`, `ReshapeBackward`, `TransposeBackward`
+  - [ ] `Tensor.backward()` (seed gradient to 1.0 for scalars, accumulate into .grad, recurse through _grad_fn)
+  - [ ] `Tensor.zero_grad()` (set .grad to None)
+  - [ ] `enable_autograd()` (monkey-patch Tensor ops to attach _grad_fn on output)
+  - [ ] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
+
+- [ ] Person D — Optimizers + Trainer
+  - [ ] ⚠️ Blocked by Person C — needs Tensor.backward() and .grad before optimizer steps can be tested end-to-end
+  - [ ] `Optimizer` base class (`zero_grad()`, `step()` interface)
+  - [ ] `SGD` with momentum (velocity buffer, lazy init, weight decay)
+  - [ ] `Adam` (m and v buffers, bias correction 1 - β^t, adaptive step)
+  - [ ] `AdamW` (same as Adam but weight decay applied after gradient update, decoupled)
+  - [ ] `CosineSchedule.get_lr()` (cosine annealing formula)
+  - [ ] `clip_grad_norm()` (global norm across all params, uniform scale if exceeds max_norm)
+  - [ ] `Trainer.train_epoch()` (forward, loss, backward, clip, step, zero_grad, scheduler update)
+  - [ ] `Trainer.evaluate()` (model.training=False, forward only, loss + accuracy)
+  - [ ] `Trainer.save_checkpoint()` / `load_checkpoint()` (pickle full state)
+  - [ ] Tests: Adam memory 3x params, zero_grad between iterations, checkpoint round-trip
+    
 - GPU Person A - memory management, basic arithmetic, activations  
   - [ ] `detect()` to check for GPU support 
   - [ ] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
@@ -65,11 +101,11 @@ Week 2
   - [ ] tiled implementation of `__matmul__` (need to manually boradcast)
   - [ ] Reductions 
 
+Week 4:
+
 Week 3
 ------
 
-- [ ] Optimizer? (CPU)
-- [ ] Convolution
 - [ ] Have a working backward pass (GPU)
 - [ ] Integrate CPU and GPU together 
 
@@ -77,5 +113,8 @@ Week 3
 
 Week 4
 ------
+- [ ] Specialized layers (CNN or attention) 
+- [ ] Have a working backward pass (CPU)
+- [ ] visualizing the computation graph
 
 - [ ] Iterate 

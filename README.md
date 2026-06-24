@@ -44,7 +44,7 @@ Week 1
     - Memory transfers and thread mapping for 1d and nd tensors 
     - Handling alignments 
 
-Week 2 & 3 
+Week 2 & 3 & Part of Week 4
 ------
 - [ ] Person A — Losses + log_softmax helper - Trisha
   - [ ] No blockers — depends only on Tensor (Sprint 1)
@@ -113,8 +113,5 @@ Week 3
 
 Week 4
 ------
-- [ ] Specialized layers (CNN or attention) 
-- [ ] Have a working backward pass (CPU)
-- [ ] visualizing the computation graph
-
+- [ ] Review Demo 
 - [ ] Iterate 

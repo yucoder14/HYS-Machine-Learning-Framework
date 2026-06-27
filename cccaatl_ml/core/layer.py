@@ -1,5 +1,5 @@
 import numpy as np
-from core.tensor import Tensor
+from cccaatl_ml.core.tensor import Tensor
 
 INIT_SCALE_FACTOR = 1
 DROPOUT_MIN_PROB = 0.0
@@ -71,7 +71,7 @@ class Dropout(Layer):
         return []
 
 
-class Sequential:
+class Sequential(Layer):
     def __init__(self, *layers):
         if len(layers) == 1 and isinstance(layers[0], (list, tuple)):
             self.layers = list(layers[0])

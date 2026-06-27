@@ -1,5 +1,5 @@
 import numpy as np
-from tensor import Tensor
+from cccaatl_ml.core.tensor import Tensor
 
 class Activation:
     def forward(self, x: Tensor) -> Tensor:

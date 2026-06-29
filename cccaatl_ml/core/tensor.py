@@ -4,7 +4,7 @@ class Tensor:
     #uhh i kinda forgot how to oop in python
 
     def __init__(self, data):
-        self._array = np.array(data) if isinstance(data, list) else data
+        self._array = np.ndarray(data) if isinstance(data, list) else data
         self.shape = self._array.shape
         self.size = self._array.size
         self.dtype = self._array.dtype
@@ -42,7 +42,9 @@ class Tensor:
         return self.matmul(other)
 
     def matmul(self,other): 
-        result = Tensor(np.matmul(self._array, self._coerce(other)))
+        if not isinstance(other, Tensor): 
+          raise ValueError(f"Type mismatch: trying to multiply Tensor by a {type(other)}")
+        result = Tensor(self._array @ self._coerce(other))
         return result 
     
     def sum(self, axis=None, keepdims=False):

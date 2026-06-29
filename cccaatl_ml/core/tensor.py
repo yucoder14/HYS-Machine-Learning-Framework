@@ -1,14 +1,16 @@
 import numpy as np
 
+
 class Tensor:
     #uhh i kinda forgot how to oop in python
 
-    def __init__(self, data):
+    def __init__(self, data, device="cpu"):
         self._array = data
         self.shape = self._array.shape
         self.size = self._array.size
         self.dtype = self._array.dtype
         self.data = data
+        self.device = device
     
     #Private helper: returns a raw nparray or scalar
     def _coerce(self, other):
@@ -16,20 +18,84 @@ class Tensor:
             return other._array
         return other
 
-    #Tensor arithmetic
+    def _is_scalar(self, other):
+        return isinstance(other, (int, float, np.number))
+
+    # --- device management ---
+
+    def to(self, device):
+        """Move tensor to ``device`` ("cpu" or "cuda").
+
+        Returns *self* for chaining.  If the tensor is already on the
+        target device, this is a no-op.
+        """
+        if device == self.device:
+            return self
+        if device == "cuda":
+            from numba import cuda
+            self._array = cuda.to_device(self._array)
+            self.device = "cuda"
+        elif device == "cpu":
+            self._array = self._array.copy_to_host()
+            self.device = "cpu"
+        else:
+            raise ValueError(f"Unknown device: {device!r}")
+        self.data = self._array
+        self.shape = self._array.shape
+        return self
+
+    def numpy(self):
+        """Return a NumPy array copy of the tensor data.
+
+        If the tensor lives on the GPU, this physically copies it to the
+        CPU.  The tensor itself is not modified.
+        """
+        if self.device == "cuda":
+            return self._array.copy_to_host()
+        return np.array(self._array)
+
+    # --- Tensor arithmetic ---
+
     def __add__(self, other):
+        if self.device == "cuda":
+            return self._cuda_binary(other, "add")
         return Tensor(self._array + self._coerce(other))
-    
+
     def __sub__(self, other):
+        if self.device == "cuda":
+            return self._cuda_binary(other, "sub")
         return Tensor(self._array - self._coerce(other))
-    
+
     def __mul__(self, other):
-        result = Tensor(self._array * self._coerce(other))
-        return result
-    
+        if self.device == "cuda":
+            return self._cuda_binary(other, "mul")
+        return Tensor(self._array * self._coerce(other))
+
     def __truediv__(self, other):
-        result = Tensor(self._array / self._coerce(other))
-        return result
+        if self.device == "cuda":
+            return self._cuda_binary(other, "div")
+        return Tensor(self._array / self._coerce(other))
+
+    def _cuda_binary(self, other, op):
+        """Dispatch a binary op to CUDA kernels with manual broadcasting."""
+        from cccaatl_ml.cuda import kernels as K
+
+        scalar = self._coerce(other)
+        is_scalar = self._is_scalar(other) or (not hasattr(scalar, "shape"))
+
+        fn_map = {
+            "add": (K.cuda_scalar_add, K.cuda_add),
+            "sub": (K.cuda_scalar_sub, K.cuda_sub),
+            "mul": (K.cuda_scalar_mul, K.cuda_mul),
+            "div": (K.cuda_scalar_div, K.cuda_div),
+        }
+        scalar_fn, tensor_fn = fn_map[op]
+
+        if is_scalar:
+            out_dev = scalar_fn(self._array, scalar)
+        else:
+            out_dev = tensor_fn(self._array, scalar, self.shape, scalar.shape)
+        return Tensor(out_dev, device="cuda")
 
     def matmul(self,other): 
         result = Tensor(np.matmul(self._array, self._coerce(other)))

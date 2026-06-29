@@ -89,12 +89,12 @@ Week 2 & 3 & Part of Week 4
     
 - GPU Person A - memory management, basic arithmetic, activations  
   - [ ] `detect()` to check for GPU support 
-  - [ ] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
   - [ ] `.numpy()` physically fetch data from GPU to CPU 
   - [ ] Kernels for basic operations: `__add__`, `__subtract__`, `__mul__`, `__truediv__` (need to manually broadcast)
   - [ ] Kernels for activation layers: `ReLU`, `GELU`, `Sigmoid`, `Tanh`, `Softmax`
 
 - GPU Person B - matrix multiplication, reductions, testing/profiling suite 
+  - [x] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
   - [ ] CI to benchmark CPU operations 
   - [ ] CI to confirm correctness of CUDA kernels 
   - [ ] Naive implementation of `__matmul__` (need to manually broadcast)

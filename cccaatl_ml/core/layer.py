@@ -1,5 +1,5 @@
 import numpy as np
-from core.tensor import Tensor
+from tensor import Tensor
 
 INIT_SCALE_FACTOR = 1
 DROPOUT_MIN_PROB = 0.0

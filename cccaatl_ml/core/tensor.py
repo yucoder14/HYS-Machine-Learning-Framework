@@ -113,7 +113,7 @@ class Tensor:
     #uhh i kinda forgot how to oop in python
 
     def __init__(self, data, requires_grad=False):
-        self._array = data
+        self._array = np.ndarray(data) if isinstance(data, list) else data
         self.shape = self._array.shape
         self.size = self._array.size
         self.dtype = self._array.dtype
@@ -145,6 +145,9 @@ class Tensor:
     def __truediv__(self, other):
         out = Tensor(self._array / self._coerce(other))
         return _track(out, DivBackward, (self, other))
+    
+    def __matmul__(self, other): 
+        return self.matmul(other)
 
     def matmul(self, other):
         out = Tensor(np.matmul(self._array, self._coerce(other)))
@@ -159,6 +162,9 @@ class Tensor:
 
     def max(self, axis=None, keepdims=False):
         return Tensor(np.max(self._array, axis=axis, keepdims=keepdims))
+
+    def min(self, axis=None, keepdims=False):
+        return Tensor(np.min(self._array, axis=axis, keepdims=keepdims))
 
     # functional (returns a new Tensor) so the result can be a graph node
     def reshape(self, *shape):

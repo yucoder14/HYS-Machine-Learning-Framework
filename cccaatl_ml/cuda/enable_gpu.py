@@ -97,7 +97,7 @@ def enable_gpu():
   _original_max = Tensor.max
   _original_min = Tensor.min
 
-  def cuda_aware_sum(self, axis=None, keepdims=None): 
+  def cuda_aware_sum(self, axis=None, keepdims=False): 
     if self.device == "cpu": 
       return _original_sum(self, axis=axis, keepdims=keepdims)
     elif self.device == "gpu":
@@ -105,7 +105,7 @@ def enable_gpu():
     else: 
       pass # silently fail for undetected devices
 
-  def cuda_aware_mean(self, axis=None, keepdims=None): 
+  def cuda_aware_mean(self, axis=None, keepdims=False): 
     if self.device == "cpu": 
       return _original_mean(self, axis=axis, keepdims=keepdims)
     elif self.device == "gpu":
@@ -113,7 +113,7 @@ def enable_gpu():
     else: 
       pass
 
-  def cuda_aware_max(self, axis=None, keepdims=None): 
+  def cuda_aware_max(self, axis=None, keepdims=False): 
     if self.device == "cpu": 
       return _original_max(self, axis=axis, keepdims=keepdims)
     elif self.device == "gpu":
@@ -121,7 +121,7 @@ def enable_gpu():
     else: 
       pass
       
-  def cuda_aware_min(self, axis=None, keepdims=None): 
+  def cuda_aware_min(self, axis=None, keepdims=False): 
     if self.device == "cpu": 
       return _original_min(self, axis=axis, keepdims=keepdims)
     elif self.device == "gpu":

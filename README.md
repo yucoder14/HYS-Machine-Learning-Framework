@@ -63,16 +63,16 @@ Week 2 & 3 & Part of Week 4
   - [ ] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
   - [ ] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
 
-- [ ] Person C — Autograd - Anand 
-  - [ ] No blockers — depends only on Tensor (Sprint 1)
-  - [ ] `Function` base class (stores `saved_tensors`, defines `apply()`)
-  - [ ] `AddBackward`, `SubBackward`, `MulBackward`, `DivBackward` (gradient rules for arithmetic)
-  - [ ] `MatmulBackward` (grad_A = grad @ B.T, grad_B = A.T @ grad)
-  - [ ] `SumBackward`, `ReshapeBackward`, `TransposeBackward`
-  - [ ] `Tensor.backward()` (seed gradient to 1.0 for scalars, accumulate into .grad, recurse through _grad_fn)
-  - [ ] `Tensor.zero_grad()` (set .grad to None)
-  - [ ] `enable_autograd()` (monkey-patch Tensor ops to attach _grad_fn on output)
-  - [ ] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
+- [x] Person C — Autograd - Anand 
+  - [x] No blockers — depends only on Tensor (Sprint 1)
+  - [x] `Function` base class (stores `saved_tensors`, defines `apply()`)
+  - [x] `AddBackward`, `SubBackward`, `MulBackward`, `DivBackward` (gradient rules for arithmetic)
+  - [x] `MatmulBackward` (grad_A = grad @ B.T, grad_B = A.T @ grad)
+  - [x] `SumBackward`, `ReshapeBackward`, `TransposeBackward`
+  - [x] `Tensor.backward()` (seed gradient to 1.0 for scalars, accumulate into .grad, recurse through _grad_fn)
+  - [x] `Tensor.zero_grad()` (set .grad to None)
+  - [x] `enable_autograd()` (monkey-patch Tensor ops to attach _grad_fn on output)
+  - [x] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
 
 - [ ] Person D — Optimizers + Trainer - Tina
   - [ ] ⚠️ Blocked by Person C — needs Tensor.backward() and .grad before optimizer steps can be tested end-to-end. However can get started without implementation by assuming function
@@ -87,14 +87,14 @@ Week 2 & 3 & Part of Week 4
   - [ ] `Trainer.save_checkpoint()` / `load_checkpoint()` (pickle full state)
   - [ ] Tests: Adam memory 3x params, zero_grad between iterations, checkpoint round-trip
     
-- GPU Person A - memory management, basic arithmetic, activations  
+- GPU Person A - memory management, basic arithmetic, activations - Lily
   - [ ] `detect()` to check for GPU support 
+  - [ ] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
   - [ ] `.numpy()` physically fetch data from GPU to CPU 
   - [ ] Kernels for basic operations: `__add__`, `__subtract__`, `__mul__`, `__truediv__` (need to manually broadcast)
   - [ ] Kernels for activation layers: `ReLU`, `GELU`, `Sigmoid`, `Tanh`, `Softmax`
 
-- GPU Person B - matrix multiplication, reductions, testing/profiling suite 
-  - [x] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
+- GPU Person B - matrix multiplication, reductions, testing/profiling suite - Changwoo
   - [ ] CI to benchmark CPU operations 
   - [ ] CI to confirm correctness of CUDA kernels 
   - [ ] Naive implementation of `__matmul__` (need to manually broadcast)

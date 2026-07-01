@@ -8,6 +8,10 @@ class Activation:
     def __call__(self, x: Tensor) -> Tensor:
         return self.forward(x)
 
+    def parameters(self):
+        # Activations are stateless -- no learnable parameters.
+        return []
+
     def backward(self, grad: Tensor) -> Tensor:
         # Stub -- automatic differentiation arrives in Module 06.
         raise NotImplementedError("backward() is implemented in Module 06 (Autograd)")

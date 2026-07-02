@@ -223,8 +223,25 @@ def enable_gpu_Tensor():
     # End of dynamic modification
     Tensor._cuda_enabled = True
 
+def enable_gpu_Activations(): 
+    if hasattr(Activation, "_cuda_enabled") and Activation._cuda_enabled: 
+        return
+
+    def to(self, device="cpu"): 
+        self.device = device
+
+    Activation.to = to
+
+    _original_relu = ReLU.forward 
+    _original_sig = Sigmoid.forward
+    _original_tanh = Tanh.forward
+    _original_gelu = GELU.forward
+    _original_softmax = Softmax.forward
+
+    Activation._cuda_enabled = True
+
 def enable_gpu_Layer(): 
-    if not Tensor._cuda_enabled:
+    if not Tensor._cuda_enabled or not Activation._cuda_enabled:
         return
 
     if hasattr(Layer, "_cuda_enabled") and Layer._cuda_enabled:
@@ -244,28 +261,14 @@ def enable_gpu_Layer():
         for layer in self.layers:
             layer.to(device)
 
-    Sequential.to = to
+    Sequential.to = to_layers
+
     Layer._cuda_enabled = True
-
-def enable_gpu_Activations(): 
-    if hasattr(Activation, "_cuda_enabled") and Activation._cuda_enabled: 
-        return
-
-    def to(self, device="cpu"): 
-        self.device = device
-
-    Activation.to = to
-
-    _original_relu = ReLU.forward 
-    _original_sig = Sigmoid.forward
-    _original_tanh = Tanh.forward
-    _original_gelu = GELU.forward
-    _original_softmax = Softmax.forward
-
-
-    Activation._cuda_enabled = True
 
 def enable_gpu():
     enable_gpu_Tensor()
-    enable_gpu_Layer()
     enable_gpu_Activations()
+    enable_gpu_Layer()
+
+    global CUPY_ENABLED 
+    CUPY_ENABLED = True

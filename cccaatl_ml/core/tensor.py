@@ -16,7 +16,7 @@ def _val(x):
 
 # undo numpy broadcasting: sum grad back down to the input's shape
 def _unbroadcast(grad, shape):
-    grad = np.asarray(grad)
+    grad = np.asarray(grad) 
     while grad.ndim > len(shape):
         grad = grad.sum(axis=0)
     for axis, dim in enumerate(shape):
@@ -56,64 +56,63 @@ class Function:
 class AddBackward(Function):
     def backward(self, grad):
         a, b = self.inputs
-        return [_unbroadcast(grad, np.shape(_val(a))),
-                _unbroadcast(grad, np.shape(_val(b)))]
+        return [self.fn_unbroadcast(grad, _val(a).shape),
+                self.fn_unbroadcast(grad, _val(b).shape)]
 
 
 class SubBackward(Function):
     def backward(self, grad):
         a, b = self.inputs
-        return [_unbroadcast(grad, np.shape(_val(a))),
-                _unbroadcast(-grad, np.shape(_val(b)))]
+        return [self.fn_unbroadcast(grad, _val(a).shape),
+                self.fn_unbroadcast(-grad, _val(b).shape)]
 
 
 class MulBackward(Function):
     def backward(self, grad):
         a, b = self.inputs
         av, bv = _val(a), _val(b)
-        return [_unbroadcast(grad * bv, np.shape(av)),
-                _unbroadcast(grad * av, np.shape(bv))]
+        return [self.fn_unbroadcast(grad * bv, av.shape),
+                self.fn_unbroadcast(grad * av, bv.shape)]
 
 
 class DivBackward(Function):
     def backward(self, grad):
         a, b = self.inputs
         av, bv = _val(a), _val(b)
-        return [_unbroadcast(grad / bv, np.shape(av)),
-                _unbroadcast(-grad * av / (bv * bv), np.shape(bv))]
+        return [self.fn_unbroadcast(grad / bv, av.shape),
+                self.fn_unbroadcast(-grad * av / (bv * bv), bv.shape)]
 
 
 class MatmulBackward(Function):
     def backward(self, grad):
         a, b = self.inputs
-        return [grad @ _swap_last2(_val(b)), _swap_last2(_val(a)) @ grad]
+        return [grad @ self.swap(_val(b)), self.swap(_val(a)) @ grad]
 
 
 class SumBackward(Function):
     def backward(self, grad):
         (a,) = self.inputs
-        grad = np.asarray(grad)
+        grad = self.asarray(grad)
         if self.axis is not None and not self.keepdims:
-            grad = np.expand_dims(grad, self.axis)
-        return [np.broadcast_to(grad, np.shape(_val(a))).copy()]
+            grad = self.expand_dims(grad, self.axis)
+        return [self.broadcast_to(grad, _val(a).shape).copy()]
 
 
 class ReshapeBackward(Function):
     def backward(self, grad):
         (a,) = self.inputs
-        return [np.asarray(grad).reshape(np.shape(_val(a)))]
-
+        return [self.asarray(grad).reshape(_val(a).shape)]
 
 class TransposeBackward(Function):
     def backward(self, grad):
-        return [_swap_last2(grad)]
+        return [self.swap(grad)]
 
 
 class Tensor:
     #uhh i kinda forgot how to oop in python
 
     def __init__(self, data, requires_grad=False):
-        self._array = np.ndarray(data) if isinstance(data, list) else data
+        self._array = np.asarray(data) if isinstance(data, list) else data
         self.shape = self._array.shape
         self.size = self._array.size
         self.dtype = self._array.dtype
@@ -132,30 +131,31 @@ class Tensor:
     #Tensor arithmetic
     def __add__(self, other):
         out = Tensor(self._array + self._coerce(other))
-        return _track(out, AddBackward, (self, other))
+        return _track(out, AddBackward, (self, other), fn_unbroadcast=_unbroadcast)
 
     def __sub__(self, other):
         out = Tensor(self._array - self._coerce(other))
-        return _track(out, SubBackward, (self, other))
+        return _track(out, SubBackward, (self, other), fn_unbroadcast=_unbroadcast)
 
     def __mul__(self, other):
         out = Tensor(self._array * self._coerce(other))
-        return _track(out, MulBackward, (self, other))
+        return _track(out, MulBackward, (self, other), fn_unbroadcast=_unbroadcast)
 
     def __truediv__(self, other):
         out = Tensor(self._array / self._coerce(other))
-        return _track(out, DivBackward, (self, other))
+        return _track(out, DivBackward, (self, other), fn_unbroadcast=_unbroadcast)
     
     def __matmul__(self, other): 
         return self.matmul(other)
 
     def matmul(self, other):
         out = Tensor(np.matmul(self._array, self._coerce(other)))
-        return _track(out, MatmulBackward, (self, other))
+        return _track(out, MatmulBackward, (self, other), swap=_swap_last2)
 
     def sum(self, axis=None, keepdims=False):
         out = Tensor(np.sum(self._array, axis=axis, keepdims=keepdims))
-        return _track(out, SumBackward, (self,), axis=axis, keepdims=keepdims)
+        return _track(out, SumBackward, (self,), axis=axis, keepdims=keepdims,
+                      asarray=np.asarray, expand_dims=np.expand_dims, broadcast_to=np.broadcast_to)
 
     def mean(self,axis=None, keepdims=False):
         return Tensor(np.mean(self._array, axis=axis, keepdims=keepdims))
@@ -171,14 +171,14 @@ class Tensor:
         if(len(shape) == 1 and isinstance(shape[0], (tuple,list))):
             shape = shape[0]
         out = Tensor(self._array.reshape(shape))
-        return _track(out, ReshapeBackward, (self,))
+        return _track(out, ReshapeBackward, (self,), asarray=np.asarray)
 
     def transpose(self):
         if (self._array.ndim >= 2):
             out = Tensor(np.swapaxes(self._array, -1, -2))
         else:
             out = Tensor(self._array.transpose())
-        return _track(out, TransposeBackward, (self,))
+        return _track(out, TransposeBackward, (self,), swap=_swap_last2)
 
     def backward(self, grad=None):
         if not self.requires_grad:

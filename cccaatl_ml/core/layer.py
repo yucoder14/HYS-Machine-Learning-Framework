@@ -71,7 +71,7 @@ class Dropout(Layer):
         return []
 
 
-class Sequential:
+class Sequential(Layer):
     def __init__(self, *layers):
         if len(layers) == 1 and isinstance(layers[0], (list, tuple)):
             self.layers = list(layers[0])

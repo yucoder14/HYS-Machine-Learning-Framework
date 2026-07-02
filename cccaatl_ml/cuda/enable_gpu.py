@@ -31,7 +31,7 @@ def enable_gpu_Tensor():
     def cuda_aware_init(self, data, *args, device = "cpu"):
         _original_init(self, data, *args)
         self.device = device 
-        if device == "gpu": 
+        if self.device == "gpu": 
           self._array = cp.asarray(self._array)
 
     def cuda_aware_str(self):
@@ -47,9 +47,9 @@ def enable_gpu_Tensor():
             return 
         else: 
             self.device = device
-            if device == "cpu": 
+            if self.device == "cpu": 
                 self._array = cp.asnumpy(self._array)
-            elif device == "gpu":
+            elif self.device == "gpu":
                 self._array = cp.asarray(self._array)  
             else: 
                 raise ValueError(f"Unrecognized device: {device} does not exist or yet to be supported")
@@ -71,7 +71,7 @@ def enable_gpu_Tensor():
 
         # just changing the numpy based fn to bupy based fn to be used in 
         # backward call
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
@@ -82,7 +82,7 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to subtract Tensors in different devices")
         result = _original_sub(self, other)
 
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
             
         result.device = self.device 
@@ -93,7 +93,7 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to multiply Tensors in different devices")
         result = _original_mul(self, other)
 
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
@@ -104,7 +104,7 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to divide Tensors in different devices")
         result = _original_truediv(self, other)
 
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
@@ -124,7 +124,7 @@ def enable_gpu_Tensor():
         if isinstance(other, Tensor) and self.device != other.device:
             raise ValueError(f"Device mismatch: trying to matmul Tensors in different devices")
         result = _original_matmul(self, other)
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.swap = _swap_last2_cupy
             
         result.device = self.device
@@ -133,7 +133,7 @@ def enable_gpu_Tensor():
     def cuda_aware_reshape(self, *shape): 
         result = _original_reshape(self, *shape)
 
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.asarray = cp.asarray
 
         result.device = self.device
@@ -142,7 +142,7 @@ def enable_gpu_Tensor():
     def cuda_aware_transpose(self):
         result = _original_transpose(self)
 
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.swap = _swap_last2_cupy
 
         result.device = self.device
@@ -160,7 +160,7 @@ def enable_gpu_Tensor():
 
     def cuda_aware_sum(self, axis=None, keepdims=False): 
         result = _original_sum(self, axis=axis, keepdims=keepdims)
-        if device == "gpu": 
+        if self.device == "gpu": 
             self._grad_fn.asarray = cp.asarray
             self._grad_fn.expand_dims = cp.expand_dims
             self._grad_fn.broadcast_to = cp.broadcast_to

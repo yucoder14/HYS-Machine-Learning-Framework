@@ -40,7 +40,7 @@ def test_forward():
         ]) 
         net.to("gpu")
         data = Tensor(np.random.rand(32, 10), device="gpu")
-        assert net(data).sum() == 1.0
+        assert cp.allclose(net(data).sum(axis=-1, keepdims=True)._array, cp.ones(32))
     except Exception as e:
         pytest.fail(str(e))
 

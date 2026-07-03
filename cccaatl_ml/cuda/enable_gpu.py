@@ -28,8 +28,8 @@ def enable_gpu_Tensor():
     _original_str = Tensor.__str__
     _original_repr = Tensor.__repr__
 
-    def cuda_aware_init(self, data, *args, device = "cpu"):
-        _original_init(self, data, *args)
+    def cuda_aware_init(self, data, *args, device = "cpu", **named_args):
+        _original_init(self, data, *args, **named_args)
         self.device = device 
         if self.device == "gpu": 
           self._array = cp.asarray(self._array)
@@ -71,7 +71,7 @@ def enable_gpu_Tensor():
 
         # just changing the numpy based fn to bupy based fn to be used in 
         # backward call
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
@@ -82,7 +82,7 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to subtract Tensors in different devices")
         result = _original_sub(self, other)
 
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
             
         result.device = self.device 
@@ -93,7 +93,7 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to multiply Tensors in different devices")
         result = _original_mul(self, other)
 
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
@@ -104,7 +104,7 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to divide Tensors in different devices")
         result = _original_truediv(self, other)
 
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
@@ -124,7 +124,7 @@ def enable_gpu_Tensor():
         if isinstance(other, Tensor) and self.device != other.device:
             raise ValueError(f"Device mismatch: trying to matmul Tensors in different devices")
         result = _original_matmul(self, other)
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.swap = _swap_last2_cupy
             
         result.device = self.device
@@ -133,7 +133,7 @@ def enable_gpu_Tensor():
     def cuda_aware_reshape(self, *shape): 
         result = _original_reshape(self, *shape)
 
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.asarray = cp.asarray
 
         result.device = self.device
@@ -142,7 +142,7 @@ def enable_gpu_Tensor():
     def cuda_aware_transpose(self):
         result = _original_transpose(self)
 
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.swap = _swap_last2_cupy
 
         result.device = self.device
@@ -160,7 +160,7 @@ def enable_gpu_Tensor():
 
     def cuda_aware_sum(self, axis=None, keepdims=False): 
         result = _original_sum(self, axis=axis, keepdims=keepdims)
-        if self.device == "gpu": 
+        if self.device == "gpu" and self._grad_fn is not None: 
             self._grad_fn.asarray = cp.asarray
             self._grad_fn.expand_dims = cp.expand_dims
             self._grad_fn.broadcast_to = cp.broadcast_to
@@ -247,6 +247,14 @@ def enable_gpu_Layer():
     if hasattr(Layer, "_cuda_enabled") and Layer._cuda_enabled:
         return 
 
+    _original_init_layer = Layer.__init__
+
+    def cuda_aware_init_layer(self): 
+      _original_init_layer(self)
+      self.device = "cpu"
+    
+    Layer.__init__ = cuda_aware_init_layer
+
     def to(self, device="cpu"): 
         attrs = vars(self) 
         for name, value in attrs.items(): 
@@ -260,6 +268,7 @@ def enable_gpu_Layer():
     def to_layers(self, device="cpu"):
         for layer in self.layers:
             layer.to(device)
+        self.device = device
 
     Sequential.to = to_layers
 

@@ -39,10 +39,10 @@ def test_forward():
             Softmax()
         ]) 
         net.to("gpu")
-        data = Tensor(np.random.rand((32, 10)), device="gpu")
+        data = Tensor(np.random.rand(32, 10), device="gpu")
         assert net(data).sum() == 1.0
     except Exception as e:
-        pytest.fail(e)
+        pytest.fail(str(e))
 
 def test_device_error(create_tensor, create_tensor_gpu): 
     with pytest.raises(ValueError): 

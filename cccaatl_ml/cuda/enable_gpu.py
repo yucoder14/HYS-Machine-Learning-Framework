@@ -1,8 +1,12 @@
 import cupy as cp
+import numpy as np
 from cccaatl_ml.core.tensor import *
 from cccaatl_ml.core.layer import *
 from cccaatl_ml.core.activations import *
 
+"""
+    Helper functions 
+"""
 def _unbroadcast_cupy(grad, shape):
     grad = cp.asarray(grad) 
     while grad.ndim > len(shape):
@@ -32,7 +36,10 @@ def enable_gpu_Tensor():
         _original_init(self, data, *args, **named_args)
         self.device = device 
         if self.device == "gpu": 
-          self._array = cp.asarray(self._array)
+            self._array = cp.asarray(self._array)
+        elif isinstance(data, cp.ndarray):
+            self.device = "gpu"
+
 
     def cuda_aware_str(self):
         return f"Tensor(data={self.data}, device={self.device})"
@@ -227,16 +234,19 @@ def enable_gpu_Activations():
     if hasattr(Activation, "_cuda_enabled") and Activation._cuda_enabled: 
         return
 
+    _original_init_activation = Activation.__init__
+
+    def cuda_aware_init(self, device="cpu"): 
+        _original_init_activation(self)
+        self.device = device  
+        self.base_class = cp if device == "gpu" else np
+
     def to(self, device="cpu"): 
         self.device = device
+        self.base_class = cp if device == "gpu" else np
 
+    Activation.__init__ = cuda_aware_init
     Activation.to = to
-
-    _original_relu = ReLU.forward 
-    _original_sig = Sigmoid.forward
-    _original_tanh = Tanh.forward
-    _original_gelu = GELU.forward
-    _original_softmax = Softmax.forward
 
     Activation._cuda_enabled = True
 
@@ -257,6 +267,10 @@ def enable_gpu_Layer():
 
     def to(self, device="cpu"): 
         attrs = vars(self) 
+        # for dropout layer
+        if hasattr(self, "base_class"): 
+            self.base_class = cp if device == "gpu" else np
+        # for layers that use Tensors
         for name, value in attrs.items(): 
             if isinstance(value, Tensor):
                 tensor = self.__getattribute__(name) 

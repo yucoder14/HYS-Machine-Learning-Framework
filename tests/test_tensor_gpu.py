@@ -5,6 +5,8 @@ from cccaatl_ml.core.activations import *
 import numpy as np
 import pytest
 
+cp = pytest.importorskip("cupy")
+
 cuda_enable = pytest.importorskip("cccaatl_ml.cuda.enable_gpu")
 cuda_enable.enable_gpu()
 
@@ -20,7 +22,7 @@ def test_device_correct(create_tensor_gpu):
     assert create_tensor_gpu.device == "gpu"
     assert isinstance(create_tensor_gpu._array, cp.ndarray)
 
-def test_forward(create_net, create_batch_data): 
+def test_forward(): 
     try:
         net = Sequential([
             Linear(10, 10), 
@@ -51,7 +53,7 @@ def test_matmul_correct(create_tensor_gpu):
 
 def test_matmul_error(create_tensor_gpu):
     with pytest.raises(ValueError):
-        create_tensor_gpu.matmul(np.array([1,2]))
+        create_tensor_gpu.matmul(cp.array([1,2]))
 
 def test_sum(create_tensor_gpu):
     assert create_tensor_gpu.sum()._array == 6

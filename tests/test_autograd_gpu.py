@@ -2,6 +2,8 @@ from cccaatl_ml.core.tensor import Tensor, enable_autograd
 import numpy as np
 import pytest
 
+cp = pytest.importorskip("cupy")
+
 enable_autograd()
 cuda_enable = pytest.importorskip("cccaatl_ml.cuda.enable_gpu")
 cuda_enable.enable_gpu()
@@ -11,9 +13,9 @@ def test_add_chain():
     a = Tensor(np.array([1.0, 2.0, 3.0]), requires_grad=True, device="gpu")
     b = Tensor(np.array([4.0, 5.0, 6.0]), requires_grad=True, device="gpu")
     y = (a + b) * a
-    y.backward(np.ones(3))
-    assert np.allclose(a.grad, 2 * a._array + b._array)
-    assert np.allclose(b.grad, a._array)
+    y.backward(cp.ones(3))
+    assert cp.allclose(a.grad, 2 * a._array + b._array)
+    assert cp.allclose(b.grad, a._array)
 
 
 def test_sub_div():
@@ -21,9 +23,9 @@ def test_sub_div():
     a = Tensor(np.array([6.0, 8.0]), requires_grad=True, device="gpu")
     b = Tensor(np.array([2.0, 4.0]), requires_grad=True, device="gpu")
     y = (a - b) / b
-    y.backward(np.ones(2))
-    assert np.allclose(a.grad, 1.0 / b._array)
-    assert np.allclose(b.grad, -a._array / (b._array ** 2))
+    y.backward(cp.ones(2))
+    assert cp.allclose(a.grad, 1.0 / b._array)
+    assert cp.allclose(b.grad, -a._array / (b._array ** 2))
 
 
 def test_matmul():
@@ -31,16 +33,16 @@ def test_matmul():
     A = Tensor(np.array([[1.0, 2.0], [3.0, 4.0]]), requires_grad=True, device="gpu")
     B = Tensor(np.array([[5.0, 6.0], [7.0, 8.0]]), requires_grad=True, device="gpu")
     (A.matmul(B)).sum().backward()
-    g = np.ones((2, 2))
-    assert np.allclose(A.grad, g @ B._array.T)
-    assert np.allclose(B.grad, A._array.T @ g)
+    g = cp.ones((2, 2))
+    assert cp.allclose(A.grad, g @ B._array.T)
+    assert cp.allclose(B.grad, A._array.T @ g)
 
 
 def test_sum_then_scalar_seed():
     # scalar output seeds grad = 1 automatically
     x = Tensor(np.array([1.0, 2.0, 3.0]), requires_grad=True, device="gpu")
     (x * x).sum().backward()
-    assert np.allclose(x.grad, 2 * x._array)
+    assert cp.allclose(x.grad, 2 * x._array)
 
 
 def test_bias_broadcast():
@@ -48,7 +50,7 @@ def test_bias_broadcast():
     x = Tensor(np.ones((3, 2)), requires_grad=True, device="gpu")
     b = Tensor(np.array([1.0, 2.0]), requires_grad=True, device="gpu")
     (x + b).sum().backward()
-    assert np.allclose(b.grad, [3.0, 3.0])
+    assert cp.allclose(b.grad, [3.0, 3.0])
     assert b.grad.shape == (2,)
 
 
@@ -58,11 +60,11 @@ def test_zero_grad_resets_accumulation():
     first = x.grad.copy()
     # without zeroing, a second backward accumulates on top
     (x * x).sum().backward()
-    assert np.allclose(x.grad, 2 * first)
+    assert cp.allclose(x.grad, 2 * first)
     x.zero_grad()
     assert x.grad is None
     (x * x).sum().backward()
-    assert np.allclose(x.grad, first)
+    assert cp.allclose(x.grad, first)
 
 
 def test_requires_grad_false_skips_graph():

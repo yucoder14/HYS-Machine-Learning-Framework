@@ -1,5 +1,5 @@
 import numpy as np
-from tensor import Tensor
+from cccaatl_ml.core.tensor import Tensor
 
 INIT_SCALE_FACTOR = 1
 DROPOUT_MIN_PROB = 0.0
@@ -51,18 +51,19 @@ class Dropout(Layer):
     def __init__(self, p):
         super().__init__()
         self.p = p
+        self.base_class = np
     
     def forward(self, x, training=True):
         if not training or self.p == DROPOUT_MIN_PROB:
             return x
         if self.p == DROPOUT_MAX_PROB:
-            return Tensor(np.zeros_like(x.data), requires_grad=x.requires_grad)
+            return Tensor(self.base_class.zeros_like(x.data), requires_grad=x.requires_grad)
         
         keep_prob = 1.0 - self.p
-        mask = np.random.random(x.data.shape) < keep_prob
+        mask = self.base_class.random.random(x.data.shape) < keep_prob
 
-        mask_tensor = Tensor(mask.astype(np.float32), requires_grad=False)
-        scale = Tensor(np.array(1.0 / keep_prob), requires_grad=False)
+        mask_tensor = Tensor(mask.astype(self.base_class.float32), requires_grad=False)
+        scale = Tensor(self.base_class.array(1.0 / keep_prob), requires_grad=False)
 
         output = x * mask_tensor * scale
         return output
@@ -71,8 +72,9 @@ class Dropout(Layer):
         return []
 
 
-class Sequential:
+class Sequential(Layer):
     def __init__(self, *layers):
+        super().__init__()
         if len(layers) == 1 and isinstance(layers[0], (list, tuple)):
             self.layers = list(layers[0])
         else:

@@ -69,10 +69,10 @@ def enable_gpu_Tensor():
         # as of now, it just uses cupy
         result = _original_add(self, other)
 
-        # just changing the numpy based fn to bupy based fn to be used in 
+        # just changing the numpy based fn to cupy based fn to be used in 
         # backward call
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
         return result
@@ -82,8 +82,8 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to subtract Tensors in different devices")
         result = _original_sub(self, other)
 
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
             
         result.device = self.device 
         return result
@@ -93,8 +93,8 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to multiply Tensors in different devices")
         result = _original_mul(self, other)
 
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
         return result
@@ -104,8 +104,8 @@ def enable_gpu_Tensor():
             raise ValueError(f"Device mismatch: trying to divide Tensors in different devices")
         result = _original_truediv(self, other)
 
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.fn_unbroadcast = _unbroadcast_cupy  
 
         result.device = self.device 
         return result
@@ -124,8 +124,8 @@ def enable_gpu_Tensor():
         if isinstance(other, Tensor) and self.device != other.device:
             raise ValueError(f"Device mismatch: trying to matmul Tensors in different devices")
         result = _original_matmul(self, other)
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.swap = _swap_last2_cupy
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.swap = _swap_last2_cupy
             
         result.device = self.device
         return result
@@ -133,8 +133,8 @@ def enable_gpu_Tensor():
     def cuda_aware_reshape(self, *shape): 
         result = _original_reshape(self, *shape)
 
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.asarray = cp.asarray
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.asarray = cp.asarray
 
         result.device = self.device
         return result
@@ -142,8 +142,8 @@ def enable_gpu_Tensor():
     def cuda_aware_transpose(self):
         result = _original_transpose(self)
 
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.swap = _swap_last2_cupy
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.swap = _swap_last2_cupy
 
         result.device = self.device
         return result 
@@ -160,10 +160,10 @@ def enable_gpu_Tensor():
 
     def cuda_aware_sum(self, axis=None, keepdims=False): 
         result = _original_sum(self, axis=axis, keepdims=keepdims)
-        if self.device == "gpu" and self._grad_fn is not None: 
-            self._grad_fn.asarray = cp.asarray
-            self._grad_fn.expand_dims = cp.expand_dims
-            self._grad_fn.broadcast_to = cp.broadcast_to
+        if self.device == "gpu" and result._grad_fn is not None: 
+            result._grad_fn.asarray = cp.asarray
+            result._grad_fn.expand_dims = cp.expand_dims
+            result._grad_fn.broadcast_to = cp.broadcast_to
 
         result.device = self.device 
         return result

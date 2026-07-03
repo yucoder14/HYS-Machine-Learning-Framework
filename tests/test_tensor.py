@@ -21,4 +21,7 @@ def test_mean(create_tensor):
 
 def test_max(create_tensor):
     assert create_tensor.max()._array == 3
+    
+def test_min(create_tensor):
+    assert create_tensor.min()._array == 1
 

@@ -82,32 +82,40 @@ def matmul_strides(A, B):
     C = np.zeros(C_shape)
 
     A_flat = A.ravel()
-    B_flat = B.ravel(order="F")
+    B_flat = B.swapaxes(-2, -1).ravel() if B.ndim > 1 else B.reshape((-1, 1)).ravel()
     C_flat = C.ravel()
 
-    A_strides = np.array(A.strides, dtype=np.int32) // A.itemsize
-    B_strides = np.array(B.strides, dtype=np.int32) // B.itemsize
-    C_strides = np.array(C.strides, dtype=np.int32) // C.itemsize
+    col_size = C.shape[-1]
+    matrix_size = C.shape[-2] * C.shape[-1] 
 
-    print(C.shape)
-    print(A_strides, B_strides, C_strides)
-    k = C_strides[-2]  
+    a_num_rows = A.size // A.shape[-1]
+    b_num_rows = B.size // A.shape[-1]
 
     for i in range(C_flat.size):
-        print((i // k) + i //A.shape[-2], i)
+        a_row = i // col_size 
+        a_row %= a_num_rows
 
-    return C.reshape(C_shape)
+        b_col = i % col_size 
+        b_col += (i // matrix_size) * col_size 
+        b_col %= b_num_rows 
+
+        a_slice = slice(a_row * A.shape[-1], (a_row + 1) * A.shape[-1]) 
+        b_slice = slice(b_col * A.shape[-1], (b_col + 1) * A.shape[-1]) 
+
+        # because C_flat is just a view of C, i don't need to reshape C_flat 
+        C_flat[i] = (A_flat[a_slice] * B_flat[b_slice]).sum()
+
+    return C
 
 if __name__ == "__main__": 
     A_shape = (2, 1, 4)
-    B_shape = (2, 4, 2)
+    B_shape = (4, 1)
 
     A = np.random.rand(*A_shape)
     B = np.random.rand(*B_shape)
 
     C = matmul_strides(A, B)
+    print(A @ B)
+    print(C)
 
     assert np.allclose(A @ B, C)
-    
-    #assert np.allclose(A @ B, matmul_2D_naive_strides(A, B))
-    #assert np.allclose(A @ B, matmul_2D_naive(A, B))

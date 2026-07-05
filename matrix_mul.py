@@ -37,7 +37,7 @@ def matmul_2D_naive_strides(A, B):
 
 def _verify_shapes(A, B): 
     k = A.shape[-1]
-    k_prime = B.shape[-2] if len(B.shape) > 1 else B.shape[-1]
+    k_prime = B.shape[-2] 
 
     if k != k_prime:
         raise ValueError(f"Invalid shapes: {A.shape} and {B.shape}")
@@ -51,9 +51,7 @@ def _broadcast_shape(A, B):
     ndim = max(len(A.shape), len(B.shape))
 
     # matrix shape
-    mat_shape = () 
-    mat_shape += (A.shape[-2],) if A.ndim > 1 else ()
-    mat_shape += (B.shape[-1],) if B.ndim > 1 else ()
+    mat_shape = (A.shape[-2], B.shape[-1]) 
 
     batch_shape = ()
     # batch shape
@@ -122,6 +120,7 @@ def matmul(A, B):
         # calculate the batch and matrix coordinates 
         # these will be used to determine where i corresponds
         # to original tensor C
+        # this is a very heavy operation!!
         C_batch_coord = (i // C_batch_strides) % batch_shape 
         C_mat_coord = (i // C_mat_strides) % mat_shape
 
@@ -134,13 +133,11 @@ def matmul(A, B):
         row = C_mat_coord[0] 
         col = C_mat_coord[1] 
 
-        A_row_offset = row * K  
-        B_row_offset = col * K 
-        a_row = A_batch_offset + A_row_offset
-        b_col = B_batch_offset + B_row_offset
-        A_slice = slice(a_row, a_row + K)
-        B_slice = slice(b_col, b_col + K)
+        # slices for the correct row and column
+        A_slice = slice(A_batch_offset + row * K, A_batch_offset + (row + 1) * K)
+        B_slice = slice(B_batch_offset + col * K, B_batch_offset + (col + 1) * K)
 
+        # Take the dot product
         C_flat[i] = (A_flat[A_slice] * B_flat[B_slice]).sum()
 
     if squeeze_left: 
@@ -149,50 +146,6 @@ def matmul(A, B):
         return C.squeeze(axis=-1)
     else:
         return C
-
-def _get_coord(i, shape, strides): 
-    
-    return [(i // j) % k for j, k in zip(strides, shape)]
-
-
-# this is broken
-def matmul_strides(A, B):
-    _verify_shapes(A.shape, B.shape)
-
-    C_shape = _broadcast_shape(A.shape, B.shape)
-    C = np.zeros(C_shape)
-    C_strides = np.array(C.strides, dtype=np.int32) // C.itemsize
-
-    A_flat = A.ravel()
-    B_flat = B.swapaxes(-2, -1).ravel() if B.ndim > 1 else B.reshape((-1, 1)).ravel()
-    C_flat = C.ravel()
-
-    col_size = C.shape[-1]
-    matrix_size = C.shape[-2] * C.shape[-1]
-
-    a_num_rows = A.size // A.shape[-1]
-    b_num_rows = B.size // A.shape[-1]
-
-    for i in range(C_flat.size):
-        print(i, _get_coord(i, C_shape, C_strides))
-        #a_row = i // col_size
-        #a_row %= a_num_rows
-
-        #b_col = i % col_size
-        #b_col += (i // matrix_size) * col_size
-        #b_col %= b_num_rows
-
-        #a_slice = slice(a_row * A.shape[-1], (a_row + 1) * A.shape[-1])
-        #b_slice = slice(b_col * A.shape[-1], (b_col + 1) * A.shape[-1])
-
-        ## because C_flat is just a view of C, i don't need to reshape C_flat
-        #C_flat[i] = (A_flat[a_slice] * B_flat[b_slice]).sum()
-    print(C_shape)
-
-    
-
-    return C.squeeze(axis=-1) if B.ndim == 1 else C
-
 
 if __name__ == "__main__":
     shapes = [ 

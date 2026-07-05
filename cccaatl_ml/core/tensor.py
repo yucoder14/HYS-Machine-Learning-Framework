@@ -109,7 +109,6 @@ class TransposeBackward(Function):
 
 
 class Tensor:
-    #uhh i kinda forgot how to oop in python
 
     def __init__(self, data, requires_grad=False):
         self._array = np.asarray(data) if isinstance(data, list) else data

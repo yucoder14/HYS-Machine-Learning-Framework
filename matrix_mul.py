@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 def matmul_2D_naive(A, B):
     _verify_shapes(A.shape, B.shape)
@@ -116,13 +117,19 @@ def matmul(A, B):
     B_flat = B.swapaxes(-2, -1).ravel() 
     C_flat = C.ravel()
 
+    coord_calc_time = []
+    dot_product_time = []
+
     for i in range(C.size): 
         # calculate the batch and matrix coordinates 
         # these will be used to determine where i corresponds
         # to original tensor C
         # this is a very heavy operation!!
+        start = time.perf_counter()
         C_batch_coord = (i // C_batch_strides) % batch_shape 
         C_mat_coord = (i // C_mat_strides) % mat_shape
+        end = time.perf_counter()
+        coord_calc_time.append(end - start)
 
         # using strides to determine batch coordinates of 
         # input matrices; flat index gives the batch offset 
@@ -133,12 +140,16 @@ def matmul(A, B):
         row = C_mat_coord[0] 
         col = C_mat_coord[1] 
 
+        start = time.perf_counter()
         # slices for the correct row and column
         A_slice = slice(A_batch_offset + row * K, A_batch_offset + (row + 1) * K)
         B_slice = slice(B_batch_offset + col * K, B_batch_offset + (col + 1) * K)
 
         # Take the dot product
         C_flat[i] = (A_flat[A_slice] * B_flat[B_slice]).sum()
+        end = time.perf_counter()
+        dot_product_time.append(end - start)
+    print(np.array(coord_calc_time).mean(), np.array(dot_product_time).mean())
 
     if squeeze_left: 
         return C.squeeze(axis=0)
@@ -153,7 +164,8 @@ if __name__ == "__main__":
         [(22,), (22, 22)],
         [(22, 22), (22,)],
         [(22,), (22,)],
-        [(32,64), (64, 32)]
+        [(32,64), (64, 32)],
+        [(24, 1, 32,64), (53, 64, 32)]
     ]
 
     for a_shape, b_shape in shapes:

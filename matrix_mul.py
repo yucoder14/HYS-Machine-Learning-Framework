@@ -83,6 +83,54 @@ def _broadcast_stride(A_strides, A_shape, C_batch_dim):
 
     return strides
 
+def matmul_3D(A, B): 
+    squeeze_left = A.ndim < 2 
+    squeeze_right = B.ndim < 2
+    A = A if A.ndim > 1 else A.reshape(1, -1)
+    B = B if B.ndim > 1 else B.reshape(-1, 1)
+
+    _verify_shapes(A, B)
+
+    batch_shape, mat_shape = _broadcast_shape(A, B)
+    C = np.zeros(batch_shape + mat_shape) 
+
+    N, M = mat_shape
+    K = A.shape[-1]
+    B = B.swapaxes(-2, -1)
+
+    A_strides = np.array(A.strides, dtype=np.int32) // A.itemsize
+    B_strides = np.array(B.strides, dtype=np.int32) // B.itemsize
+    C_strides = np.array(C.strides, dtype=np.int32) // C.itemsize
+
+    A_mat_size = A.shape[-2] * A.shape[-1]
+    B_mat_size = B.shape[-2] * B.shape[-1]
+    C_mat_size = N * M
+
+    A_batch_strides = _broadcast_stride(A_strides, A.shape, len(batch_shape)) // A_mat_size
+    B_batch_strides = _broadcast_stride(B_strides, B.shape, len(batch_shape)) // B_mat_size
+    C_batch_strides = C_strides[:len(batch_shape)] // C_mat_size
+
+    A_batch_flat = A.reshape(-1, *A.shape[-2:])
+    B_batch_flat = B.reshape(-1, *B.shape[-2:])
+    C_batch_flat = C.reshape(-1, *C.shape[-2:])
+
+    for z in range(C_batch_flat.shape[0]): 
+        # calculate batch index 
+        C_batch_coord =  (z // C_batch_strides) % batch_shape 
+        A_batch_offset = int(np.dot(C_batch_coord, A_batch_strides))
+        B_batch_offset = int(np.dot(C_batch_coord, B_batch_strides))
+
+        for y in range(N): 
+            for x in range(M):
+                C_batch_flat[z, y, x] = np.dot(A_batch_flat[A_batch_offset, y], B_batch_flat[B_batch_offset, x])  
+
+    if squeeze_left: 
+        return C.squeeze(axis=0)
+    elif squeeze_right:
+        return C.squeeze(axis=-1)
+    else:
+        return C
+
 def matmul(A, B): 
     # force things into matrix forms
     squeeze_left = A.ndim < 2 
@@ -117,19 +165,13 @@ def matmul(A, B):
     B_flat = B.swapaxes(-2, -1).ravel() 
     C_flat = C.ravel()
 
-    coord_calc_time = []
-    dot_product_time = []
-
     for i in range(C.size): 
         # calculate the batch and matrix coordinates 
         # these will be used to determine where i corresponds
         # to original tensor C
         # this is a very heavy operation!!
-        start = time.perf_counter()
         C_batch_coord = (i // C_batch_strides) % batch_shape 
         C_mat_coord = (i // C_mat_strides) % mat_shape
-        end = time.perf_counter()
-        coord_calc_time.append(end - start)
 
         # using strides to determine batch coordinates of 
         # input matrices; flat index gives the batch offset 
@@ -140,16 +182,13 @@ def matmul(A, B):
         row = C_mat_coord[0] 
         col = C_mat_coord[1] 
 
-        start = time.perf_counter()
         # slices for the correct row and column
         A_slice = slice(A_batch_offset + row * K, A_batch_offset + (row + 1) * K)
         B_slice = slice(B_batch_offset + col * K, B_batch_offset + (col + 1) * K)
 
         # Take the dot product
         C_flat[i] = (A_flat[A_slice] * B_flat[B_slice]).sum()
-        end = time.perf_counter()
-        dot_product_time.append(end - start)
-    print(np.array(coord_calc_time).mean(), np.array(dot_product_time).mean())
+    #print(np.array(coord_calc_time).mean(), np.array(dot_product_time).mean())
 
     if squeeze_left: 
         return C.squeeze(axis=0)
@@ -172,6 +211,16 @@ if __name__ == "__main__":
         A = np.random.rand(*a_shape)
         B = np.random.rand(*b_shape)
 
-        C = matmul(A, B)
+        start = time.perf_counter()
+        _C = A @ B
+        end = time.perf_counter()
+        numpy_time = end - start
+
+        start = time.perf_counter()
+        C = matmul_3D(A, B)
+        print(_C.shape, C.shape)
+        end = time.perf_counter()
+        my_time = end - start
+        print(numpy_time, my_time)
 
         assert np.allclose(A @ B, C)

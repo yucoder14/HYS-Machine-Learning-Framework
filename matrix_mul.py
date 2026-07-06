@@ -114,8 +114,11 @@ def matmul_3D(A, B):
     B_batch_flat = B.reshape(-1, *B.shape[-2:])
     C_batch_flat = C.reshape(-1, *C.shape[-2:])
 
+    # using 3d coordinate system (batch_idx, row, col)
+    # by relying on 3d shape, row and col are given for free!
+    # i only have to calculate the batch offsets 
     for z in range(C_batch_flat.shape[0]): 
-        # calculate batch index 
+        # calculate batch offsets 
         C_batch_coord =  (z // C_batch_strides) % batch_shape 
         A_batch_offset = int(np.dot(C_batch_coord, A_batch_strides))
         B_batch_offset = int(np.dot(C_batch_coord, B_batch_strides))
@@ -223,4 +226,4 @@ if __name__ == "__main__":
         my_time = end - start
         print(numpy_time, my_time)
 
-        assert np.allclose(A @ B, C)
+        assert np.allclose(_C, C)

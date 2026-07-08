@@ -65,7 +65,7 @@ def _dot(a, b, dim):
     return tmp
 
 @cuda.jit
-def matmul_kernel(
+def _matmul_kernel(
     A_batch_flat, B_batch_flat, C_batch_flat,
     A_batch_strides, B_batch_strides, C_batch_strides,
     batch_shape, batch_dim, K,
@@ -183,7 +183,7 @@ def matmul_3D(A, B):
     blockspergrid_z = math.ceil(C_batch_flat.shape[0] / BATCH_DIM_NUM_THREADS) # batch dimension
     blockspergrid = (blockspergrid_x, blockspergrid_y, blockspergrid_z)
 
-    matmul_kernel[blockspergrid, threadsperblock](
+    _matmul_kernel[blockspergrid, threadsperblock](
       A_batch_flat, B_batch_flat, C_batch_flat,
       A_batch_strides, B_batch_strides, C_batch_strides,
       batch_shape, batch_dim, K,

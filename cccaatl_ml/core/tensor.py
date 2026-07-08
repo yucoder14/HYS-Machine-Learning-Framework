@@ -149,7 +149,7 @@ class Tensor:
         return self.matmul(other)
 
     def matmul(self, other):
-        out = Tensor(np.matmul(self._array, self._coerce(other)))
+        out = Tensor(self._array @ self._coerce(other))
         return _track(out, MatmulBackward, (self, other), swap=_swap_last2)
 
     def sum(self, axis=None, keepdims=False):

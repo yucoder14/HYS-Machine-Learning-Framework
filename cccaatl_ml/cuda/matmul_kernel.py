@@ -1,4 +1,4 @@
-from numba import cuda 
+from numba import cuda, types
 import cupy as cp
 import math
 
@@ -40,7 +40,7 @@ def _broadcast_stride(A_strides, A_shape, C_batch_dim):
     A_batch_shape = A_shape[:-2] if len(A_shape) > 2 else []
 
     pad_size = C_batch_dim - len(A_batch_strides) if C_batch_dim > len(A_batch_strides) else 0
-    zero_pad = cp.zeros(pad_size, dtype=np.int32)
+    zero_pad = cp.zeros(pad_size, dtype=cp.int32)
 
     strides = cp.hstack(
         (zero_pad, A_batch_strides),

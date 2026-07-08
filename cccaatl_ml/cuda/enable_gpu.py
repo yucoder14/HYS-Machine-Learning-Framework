@@ -1,6 +1,7 @@
 import cupy as cp
 import numpy as np
 from cccaatl_ml.core.tensor import *
+from cccaatl_ml.core.tensor import _track
 from cccaatl_ml.core.layer import *
 from cccaatl_ml.core.activations import *
 
@@ -129,11 +130,11 @@ def enable_gpu_Tensor():
     _original_reshape = Tensor.reshape
     _original_transpose = Tensor.transpose
 
-    def cuda_aware_matmul(self, other, use_custom_kernel=True):
+    def cuda_aware_matmul(self, other, use_custom_kernel=False):
         if isinstance(other, Tensor) and self.device != other.device:
             raise ValueError(f"Device mismatch: trying to matmul Tensors in different devices")
 
-        if use_custom_kernel: 
+        if self.device == "gpu" and use_custom_kernel: 
             out = Tensor(matmul_3D(self._array, other._array))
             return _track(out, MatmulBackward, (self, other), swap=_swap_last2_cupy)
          

@@ -109,6 +109,7 @@ class TransposeBackward(Function):
 
 
 class Tensor:
+    #uhh i kinda forgot how to oop in python
 
     def __init__(self, data, requires_grad=False):
         self._array = np.asarray(data) if isinstance(data, list) else data
@@ -148,7 +149,7 @@ class Tensor:
         return self.matmul(other)
 
     def matmul(self, other):
-        out = Tensor(np.matmul(self._array, self._coerce(other)))
+        out = Tensor(self._array @ self._coerce(other))
         return _track(out, MatmulBackward, (self, other), swap=_swap_last2)
 
     def sum(self, axis=None, keepdims=False):

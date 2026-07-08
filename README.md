@@ -54,14 +54,14 @@ Week 2 & 3 & Part of Week 4
   - [ ] `BinaryCrossEntropyLoss.forward()` (clamp predictions with eps=1e-7, BCE formula)
   - [ ] Tests: NaN on large logits (e.g. 100), shape mismatch errors, logits vs probabilities distinction
 
-- [ ] Person B — DataLoader - Catherine
-  - [ ] No blockers — depends only on Tensor (Sprint 1)
-  - [ ] `Dataset` abstract base class (`__len__`, `__getitem__` with @abstractmethod)
-  - [ ] `TensorDataset` wrapping multiple tensors, validates matching first dimension
-  - [ ] `DataLoader.__init__()` (store dataset, batch_size, shuffle flag)
-  - [ ] `DataLoader.__iter__()` (index shuffling, batch grouping, lazy generator with yield)
-  - [ ] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
-  - [ ] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
+- [x] Person B — DataLoader - Catherine
+  - [x] No blockers — depends only on Tensor (Sprint 1)
+  - [x] `Dataset` abstract base class (`__len__`, `__getitem__` with @abstractmethod)
+  - [x] `TensorDataset` wrapping multiple tensors, validates matching first dimension
+  - [x] `DataLoader.__init__()` (store dataset, batch_size, shuffle flag)
+  - [x] `DataLoader.__iter__()` (index shuffling, batch grouping, lazy generator with yield)
+  - [x] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
+  - [x] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
 
 - [x] Person C — Autograd - Anand 
   - [x] No blockers — depends only on Tensor (Sprint 1)

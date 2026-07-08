@@ -51,6 +51,9 @@ def test_device_error(create_tensor, create_tensor_gpu):
 def test_matmul_correct(create_tensor_gpu):
     assert create_tensor_gpu.matmul(create_tensor_gpu.transpose())._array == 14
 
+def test_matmul_custom_correct(create_tensor_gpu):
+    assert create_tensor_gpu.matmul(create_tensor_gpu.transpose(), use_custom_kernel=True)._array == 14
+
 def test_matmul_error(create_tensor_gpu):
     with pytest.raises(ValueError):
         create_tensor_gpu.matmul(cp.array([1,2]))

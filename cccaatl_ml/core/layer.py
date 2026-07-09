@@ -29,7 +29,7 @@ class Linear(Layer):
         self.weight = Tensor(weight_data, requires_grad=requires_grad)
 
         if bias:
-            bias_data = np.zeros(out_features)
+            bias_data = np.random.randn(out_features)
             self.bias = Tensor(bias_data, requires_grad=requires_grad)
         else:
             self.bias = None

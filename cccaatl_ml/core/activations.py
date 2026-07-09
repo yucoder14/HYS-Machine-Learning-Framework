@@ -82,7 +82,6 @@ class Softmax(Activation):
         result = exp_values / exp_sum
         return result
 
-
 class LogSoftmaxBackward(Function):
     def backward(self, grad):
         # y = log_softmax(x); dx = g - softmax(x) * sum(g along dim)

@@ -54,25 +54,25 @@ Week 2 & 3 & Part of Week 4
   - [ ] `BinaryCrossEntropyLoss.forward()` (clamp predictions with eps=1e-7, BCE formula)
   - [ ] Tests: NaN on large logits (e.g. 100), shape mismatch errors, logits vs probabilities distinction
 
-- [ ] Person B — DataLoader - Catherine
-  - [ ] No blockers — depends only on Tensor (Sprint 1)
-  - [ ] `Dataset` abstract base class (`__len__`, `__getitem__` with @abstractmethod)
-  - [ ] `TensorDataset` wrapping multiple tensors, validates matching first dimension
-  - [ ] `DataLoader.__init__()` (store dataset, batch_size, shuffle flag)
-  - [ ] `DataLoader.__iter__()` (index shuffling, batch grouping, lazy generator with yield)
-  - [ ] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
-  - [ ] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
+- [x] Person B — DataLoader - Catherine
+  - [x] No blockers — depends only on Tensor (Sprint 1)
+  - [x] `Dataset` abstract base class (`__len__`, `__getitem__` with @abstractmethod)
+  - [x] `TensorDataset` wrapping multiple tensors, validates matching first dimension
+  - [x] `DataLoader.__init__()` (store dataset, batch_size, shuffle flag)
+  - [x] `DataLoader.__iter__()` (index shuffling, batch grouping, lazy generator with yield)
+  - [x] `DataLoader._collate_batch()` (np.stack per position into batch tensors)
+  - [x] Tests: mismatched tensor dimensions, last batch smaller than batch_size, shuffle vs no shuffle
 
-- [ ] Person C — Autograd - Anand 
-  - [ ] No blockers — depends only on Tensor (Sprint 1)
-  - [ ] `Function` base class (stores `saved_tensors`, defines `apply()`)
-  - [ ] `AddBackward`, `SubBackward`, `MulBackward`, `DivBackward` (gradient rules for arithmetic)
-  - [ ] `MatmulBackward` (grad_A = grad @ B.T, grad_B = A.T @ grad)
-  - [ ] `SumBackward`, `ReshapeBackward`, `TransposeBackward`
-  - [ ] `Tensor.backward()` (seed gradient to 1.0 for scalars, accumulate into .grad, recurse through _grad_fn)
-  - [ ] `Tensor.zero_grad()` (set .grad to None)
-  - [ ] `enable_autograd()` (monkey-patch Tensor ops to attach _grad_fn on output)
-  - [ ] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
+- [x] Person C — Autograd - Anand 
+  - [x] No blockers — depends only on Tensor (Sprint 1)
+  - [x] `Function` base class (stores `saved_tensors`, defines `apply()`)
+  - [x] `AddBackward`, `SubBackward`, `MulBackward`, `DivBackward` (gradient rules for arithmetic)
+  - [x] `MatmulBackward` (grad_A = grad @ B.T, grad_B = A.T @ grad)
+  - [x] `SumBackward`, `ReshapeBackward`, `TransposeBackward`
+  - [x] `Tensor.backward()` (seed gradient to 1.0 for scalars, accumulate into .grad, recurse through _grad_fn)
+  - [x] `Tensor.zero_grad()` (set .grad to None)
+  - [x] `enable_autograd()` (monkey-patch Tensor ops to attach _grad_fn on output)
+  - [x] Tests: x.grad correct for arithmetic chains, zero_grad resets accumulation, requires_grad=False skips graph
 
 - [ ] Person D — Optimizers + Trainer - Tina
   - [ ] ⚠️ Blocked by Person C — needs Tensor.backward() and .grad before optimizer steps can be tested end-to-end. However can get started without implementation by assuming function
@@ -89,12 +89,12 @@ Week 2 & 3 & Part of Week 4
     
 - GPU Person A - memory management, basic arithmetic, activations - Lily
   - [ ] `detect()` to check for GPU support 
-  - [ ] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
   - [ ] `.numpy()` physically fetch data from GPU to CPU 
   - [ ] Kernels for basic operations: `__add__`, `__subtract__`, `__mul__`, `__truediv__` (need to manually broadcast)
   - [ ] Kernels for activation layers: `ReLU`, `GELU`, `Sigmoid`, `Tanh`, `Softmax`
 
 - GPU Person B - matrix multiplication, reductions, testing/profiling suite - Changwoo
+  - [x] `.to(device)` to logically move `Tensor` to `device` ("cpu" or "cuda")
   - [ ] CI to benchmark CPU operations 
   - [ ] CI to confirm correctness of CUDA kernels 
   - [ ] Naive implementation of `__matmul__` (need to manually broadcast)

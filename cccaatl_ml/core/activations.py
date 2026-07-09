@@ -2,6 +2,9 @@ import numpy as np
 from tensor import Tensor, Function, _track
 
 class Activation:
+    def __init__(self): 
+        self.base_class = np
+
     def forward(self, x: Tensor) -> Tensor:
         raise NotImplementedError("Subclasses must implement forward()")
 
@@ -18,30 +21,30 @@ class Activation:
 
 class ReLU(Activation):
     def forward(self, x: Tensor) -> Tensor:
-        result = np.maximum(0, x.data)
+        result = self.base_class.maximum(0, x.data)
         return Tensor(result)
 
 class Sigmoid(Activation):
     def forward(self, x: Tensor) -> Tensor:
-        z = np.clip(x.data, -500, 500)  # belt-and-suspenders overflow guard
-        result_data = np.zeros_like(z, dtype=np.float64)
+        z = self.base_class.clip(x.data, -500, 500)  # belt-and-suspenders overflow guard
+        result_data = self.base_class.zeros_like(z, dtype=self.base_class.float64)
 
         # Branch 1 -- non-negative inputs: 1 / (1 + exp(-x)) is safe here
         # because exp(-x) <= 1, never overflows.
         pos_mask = z >= 0
-        result_data[pos_mask] = 1.0 / (1.0 + np.exp(-z[pos_mask]))
+        result_data[pos_mask] = 1.0 / (1.0 + self.base_class.exp(-z[pos_mask]))
 
         # Branch 2 -- negative inputs: exp(x) / (1 + exp(x)) is safe here
         # because exp(x) < 1 when x < 0, never overflows.
         neg_mask = z < 0
-        exp_z = np.exp(z[neg_mask])
+        exp_z = self.base_class.exp(z[neg_mask])
         result_data[neg_mask] = exp_z / (1.0 + exp_z)
 
         return Tensor(result_data)
 
 class Tanh(Activation):
     def forward(self, x: Tensor) -> Tensor:
-        result = np.tanh(x.data)
+        result = self.base_class.tanh(x.data)
         return Tensor(result)
 
 class GELU(Activation):
@@ -52,7 +55,7 @@ class Softmax(Activation):
     def forward(self, x: Tensor, dim: int = -1) -> Tensor:
         # Step 1: find the max along `dim`, keep the dimension so it
         # still broadcasts cleanly against the original tensor.
-        x_max_data = np.max(x.data, axis=dim, keepdims=True)
+        x_max_data = self.base_class.max(x.data, axis=dim, keepdims=True)
         x_max = Tensor(x_max_data)
 
         # Step 2: shift every value down by that max. Largest value in
@@ -61,11 +64,11 @@ class Softmax(Activation):
 
         # Step 3: exponentiate the shifted values. Since nothing is
         # above 0, exp(...) is always in (0, 1] -- no overflow risk.
-        exp_values = Tensor(np.exp(x_shifted.data))
+        exp_values = Tensor(self.base_class.exp(x_shifted.data))
 
         # Step 4: sum the exponentials along `dim` (this is the
         # denominator -- the normalizing constant for the distribution).
-        exp_sum_data = np.sum(exp_values.data, axis=dim, keepdims=True)
+        exp_sum_data = self.base_class.sum(exp_values.data, axis=dim, keepdims=True)
         exp_sum = Tensor(exp_sum_data)
 
         # Step 5: divide each exponential by the row sum so everything

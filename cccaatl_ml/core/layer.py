@@ -19,18 +19,18 @@ class Layer:
         return []
 
 class Linear(Layer):
-    def __init__(self, in_features, out_features, bias=True):
+    def __init__(self, in_features, out_features, bias=True, requires_grad=True):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
 
         scale = np.sqrt(INIT_SCALE_FACTOR / in_features)
         weight_data = np.random.randn(in_features, out_features) * scale
-        self.weight = Tensor(weight_data)
+        self.weight = Tensor(weight_data, requires_grad=requires_grad)
 
         if bias:
             bias_data = np.zeros(out_features)
-            self.bias = Tensor(bias_data)
+            self.bias = Tensor(bias_data, requires_grad=requires_grad)
         else:
             self.bias = None
     

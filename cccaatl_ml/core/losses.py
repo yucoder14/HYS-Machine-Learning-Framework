@@ -1,6 +1,6 @@
 import numpy as np
-from tensor import Tensor, Function, _track
-from activations import log_softmax
+from cccaatl_ml.core.tensor import Tensor, Function, _track
+from cccaatl_ml.core.activations import log_softmax
 
 BCE_EPS = 1e-7
 

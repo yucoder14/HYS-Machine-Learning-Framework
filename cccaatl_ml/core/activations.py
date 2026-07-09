@@ -1,5 +1,5 @@
 import numpy as np
-from tensor import Tensor, Function, _track
+from cccaatl_ml.core.tensor import Tensor, Function, _track
 
 class Activation:
     def __init__(self): 
@@ -19,10 +19,16 @@ class Activation:
         # Stub -- automatic differentiation arrives in Module 06.
         raise NotImplementedError("backward() is implemented in Module 06 (Autograd)")
 
+class ReLUBackward(Function):
+    def backward(self, grad): 
+        x, = self.inputs 
+        mask = x._array > 0
+        return [grad * mask,]
+
 class ReLU(Activation):
     def forward(self, x: Tensor) -> Tensor:
         result = self.base_class.maximum(0, x.data)
-        return Tensor(result)
+        return _track(Tensor(result), ReLUBackward, (x,))
 
 class Sigmoid(Activation):
     def forward(self, x: Tensor) -> Tensor:

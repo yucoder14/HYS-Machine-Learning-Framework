@@ -40,7 +40,7 @@ class DataLoader:
         self.shuffle = shuffle
     
     def __iter__(self):
-        indicies = np.arrange(len(self.dataset))
+        indicies = np.arange(len(self.dataset))
         if self.shuffle:
             np.random.shuffle(indicies)
         for i in range(0, len(indicies), self.batch_size):

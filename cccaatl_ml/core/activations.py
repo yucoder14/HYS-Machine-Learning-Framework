@@ -1,5 +1,5 @@
 import numpy as np
-from tensor import Tensor
+from tensor import Tensor, Function, _track
 
 class Activation:
     def forward(self, x: Tensor) -> Tensor:
@@ -72,3 +72,21 @@ class Softmax(Activation):
         # along `dim` sums to exactly 1.
         result = exp_values / exp_sum
         return result
+
+
+class LogSoftmaxBackward(Function):
+    def backward(self, grad):
+        # y = log_softmax(x); dx = g - softmax(x) * sum(g along dim)
+        grad = np.asarray(grad)
+        sm = np.exp(self.output)  # softmax = exp(log_softmax)
+        return [grad - sm * np.sum(grad, axis=self.dim, keepdims=True)]
+
+
+def log_softmax(x: Tensor, dim: int = -1) -> Tensor:
+    # log-sum-exp trick: subtract the max before exp so nothing overflows.
+    # log_softmax(x) = (x - m) - log(sum(exp(x - m)))
+    x_max = np.max(x.data, axis=dim, keepdims=True)
+    shifted = x.data - x_max
+    log_sum_exp = np.log(np.sum(np.exp(shifted), axis=dim, keepdims=True))
+    out = Tensor(shifted - log_sum_exp)
+    return _track(out, LogSoftmaxBackward, (x,), output=out.data, dim=dim)

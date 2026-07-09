@@ -46,13 +46,13 @@ Week 1
 
 Week 2 & 3 & Part of Week 4
 ------
-- [ ] Person A — Losses + log_softmax helper - Trisha
-  - [ ] No blockers — depends only on Tensor (Sprint 1)
-  - [ ] `log_softmax()` with log-sum-exp trick (numerical stability, subtract max before exp)
-  - [ ] `MSELoss.forward()` (subtract, square, mean)
-  - [ ] `CrossEntropyLoss.forward()` (calls log_softmax, indexes correct class, negative mean)
-  - [ ] `BinaryCrossEntropyLoss.forward()` (clamp predictions with eps=1e-7, BCE formula)
-  - [ ] Tests: NaN on large logits (e.g. 100), shape mismatch errors, logits vs probabilities distinction
+- [x] Person A — Losses + log_softmax helper - Trisha
+  - [x] No blockers — depends only on Tensor (Sprint 1)
+  - [x] `log_softmax()` with log-sum-exp trick (numerical stability, subtract max before exp)
+  - [x] `MSELoss.forward()` (subtract, square, mean)
+  - [x] `CrossEntropyLoss.forward()` (calls log_softmax, indexes correct class, negative mean)
+  - [x] `BinaryCrossEntropyLoss.forward()` (clamp predictions with eps=1e-7, BCE formula)
+  - [x] Tests: NaN on large logits (e.g. 100), shape mismatch errors, logits vs probabilities distinction
 
 - [x] Person B — DataLoader - Catherine
   - [x] No blockers — depends only on Tensor (Sprint 1)
